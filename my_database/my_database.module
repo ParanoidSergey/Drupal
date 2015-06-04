@@ -1,0 +1,268 @@
+<?php
+	
+/**
+ * Implement hook_menu()
+ */
+ function my_database_menu(){
+	$items = array();
+	$items['insert-page'] = array(
+		'title' => 'Insert',
+		'page callback'   => 'drupal_get_form',
+		'page arguments'  => array('my_database_insert_page_form'),
+		'access callback' => TRUE,
+		);
+	$items['select-page'] = array(
+		'title' => 'Select',
+		'page callback'   => 'my_database_select_page_table',
+		'access callback' => TRUE
+		);
+	$items['select-page/%/update-page'] = array(
+		'title callback'  => 'my_database_update_title',
+		'title arguments' => array(1),
+		'page callback'   => 'drupal_get_form',
+		'page arguments'  => array('my_database_update_page_form',1),
+		'access callback' => TRUE,
+		);
+	$items['select-page/%/delete-page'] = array(
+		'title callback'  => 'my_database_delete_title',
+		'title arguments' => array(1),
+		'page callback'   => 'drupal_get_form',
+		'page arguments'  => array('my_database_delete_page_form',1),
+		'access callback' => TRUE,
+	);
+	return $items;
+ }
+ 
+ 
+ /**
+ * Build insert form
+ */
+ function my_database_insert_page_form($form, $form_state){
+	$form = array();
+	$form['number'] = array(
+		'#type'  => 'textfield',
+		'#title' => t('number'),
+		'#size'  => 20,
+	);
+	$form['teaser'] = array(
+		'#type'  => 'textfield',
+		'#title' => t('teaser'),
+		'#size'  => 20,
+	);
+	$form['text'] = array(
+		'#type'  => 'textarea',
+		'#title' => t('text'),
+		'#size'  => 20,
+	);
+	$form['submit'] = array(
+		'#type'  => 'submit',
+		'#value' => t('Submit'),
+	);
+	return $form;
+ }
+ 
+ 
+ /**
+ * Validate function for my_database_insert_page_form.
+ */
+ function my_database_insert_page_form_validate($form, &$form_state){
+	if (!is_numeric($form_state['values']['number'])){
+		form_set_error('number', t('Value in field "Number" is not number.'));
+	}
+	if (strlen($form_state['values']['teaser'])>=150){
+		form_set_error('teaser',t('Value to large!'));
+	}
+	if(empty($form_state['values']['text'])){
+		form_set_error('text',t('Text is empty =('));
+	}
+ }
+ 
+ 
+ /**
+ * Submit function for my_database_insert_page_form.
+ */
+ function my_database_insert_page_form_submit($form, &$form_state){
+	$fields = array(
+		'number' => $form_state['values']['number'],
+		'teaser' => $form_state['values']['teaser'],
+		'text'   => $form_state['values']['text']
+	);
+	$id = db_insert('custom_table')
+		->fields($fields)
+		->execute();
+	if($id){
+		drupal_set_message(t('Success'));
+	}
+	else{
+		form_set_error(t('Insert is failure'));
+	}
+ }
+ 
+ 
+ /**
+ * Build select table
+ */
+ function my_database_select_page_table(){
+  $header = array(t('ID'), t('Number'), t('Teaser'), t('Text'), t('Actions'));
+  $rows = array();
+  $query = db_select('custom_table', 'c')
+    ->fields('c', array('id', 'number', 'teaser', 'text'))
+    ->execute();
+  while ($value = $query->fetchAssoc()) {
+    $rows[] = array(
+      $value['id'],
+      $value['number'],
+      $value['teaser'],
+      $value['text'],
+      l(t('Delete'),"select-page/{$value['id']}/delete-page") . '/' . 
+	  l(t('Update'),"select-page/{$value['id']}/update-page"),
+    );
+  }
+  
+  $variables = array(
+	'header' => $header,
+	'rows'   => $rows
+  );
+  return theme('table', $variables);
+ }
+ 
+ 
+ /**
+ * Build delete title
+ */
+ function my_database_delete_title($id){
+	$placeholders = array(':id' => $id);
+	$number = db_query("SELECT `number` FROM {custom_table} WHERE `id` = :id", $placeholders)
+		->fetchField();
+	return t('Are you sure you want to delete this item: @num',array('@num'=>$number));
+ }
+ 
+ 
+ /**
+ * Build delete page
+ */
+ function my_database_delete_page_form($form, $form_state){
+	$form = array();
+	$form['submit'] = array(
+		'#type' => 'submit',
+		'#value' => t('Submit'),
+	);
+	$form['cancel'] = array(
+		'#markup' => l(t('Cancel'),'select-page')
+	);
+	return $form;
+ }
+ 
+ 
+ /**
+ * Submit function for my_database_delete_page_form.
+ */
+ function my_database_delete_page_form_submit($form, &$form_state){
+	$id = $form_state['build_info']['args'][0];
+	$result = db_delete('custom_table')
+		->condition('id',$id)
+		->execute();
+	$placeholders = array('@id' => $id);
+	if($result){
+		drupal_set_message(t('Record @id successfully removed',$placeholders));
+	}
+	else{
+		drupal_set_message(t('Record @id is underfined',$placeholders),'warning');
+	}
+	$form_state['redirect'] = 'select-page';
+ }
+ 
+ 
+ /**
+ * Build update title
+ */
+ function my_database_update_title($id){
+	$placeholders = array(':id' => $id);
+	$number = db_query("SELECT `number` FROM {custom_table} WHERE `id` = :id", $placeholders)->fetchField();
+	if ($number) {
+		return t('Edit item with number "@num"', array('@num' => $number));
+	}
+	else {
+		return t('Id not found.');
+	}
+ }
+ 
+ 
+ /**
+ * Build update page
+ */
+ function  my_database_update_page_form($form, $form_state){
+	$form = array();
+	$id = $form_state['build_info']['args'][0];
+	$data = db_select('custom_table','c')
+		->condition('c.id',$id)
+		->fields('c')
+		->execute()
+		->fetchAssoc();
+	if(empty($data) || empty($data['number'])){
+		$placeholders = array(
+			'@id' => $id,
+			'!back' => l(t('Go back'), 'my_database'),
+		 );
+		$form['text'] = array(
+			'#markup' => t('Undefined "@id" id. !back.', $placeholders),
+		);
+		return $form;
+	}
+	$form['number'] = array(
+		'#title' => t('Number'),
+		'#type' => 'textfield',
+		'#maxlength' => 10,
+		'#description' => t('Only numbers'),
+		'#required' => TRUE,
+		'#default_value' => $data['number'],
+	);
+	$form['teaser'] = array(
+		'#title' => t('Teaser'),
+		'#type' => 'textfield',
+		'#maxlength' => 150,
+		'#required' => TRUE,
+		'#default_value' => $data['teaser'],
+	);
+	$form['text'] = array(
+		'#title' => t('Text'),
+		'#type' => 'textarea',
+		'#required' => TRUE,
+		'#default_value' => $data['text'],
+	);
+	
+	$form['actions'] = array('#type' => 'actions');
+	$form['actions']['submit'] = array(
+		'#type' => 'submit',
+		'#value' => t('Submit'),
+	);
+	$form['actions']['cancel'] = array(
+		'#markup' => l(t('Cancel'), 'select-page')
+	);
+	$form['#validate'][] = 'my_database_insert_page_form_validate';
+	return $form;
+ }
+
+
+ /**
+ * Submit function for my_database_delete_page_form.
+ */
+ function my_database_update_page_form_submit($form, &$form_state) {
+	$id = $form_state['build_info']['args'][0];
+	$values = $form_state['values'];
+	$query = db_update('custom_table')
+		->fields(array(
+		'number' => $values['number'],
+		'teaser' => $values['teaser'],
+		'text' => $values['text'],
+		))
+		->condition('id', $id)
+		->execute();
+	if ($query) {
+	drupal_set_message(t('Data updated successfully'));
+	}
+	else {
+	drupal_set_message(t('Data is not updated'), 'warning');
+	}
+	$form_state['redirect'] = 'select-page';
+ }	

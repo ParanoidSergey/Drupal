@@ -1,0 +1,5 @@
+; $Id:$
+name = my_database
+description = this module is designed to work with the table custom_table
+version = 7.x-dev
+core = 7.x
