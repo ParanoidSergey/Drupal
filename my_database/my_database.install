@@ -6,12 +6,12 @@
  function my_database_install(){
 	$name = 'custom_table';
 	$schema = array(
-	'description'		=>	'creating custom_table',
-	'fields'	 		=> 	array(
-			'id'	=> array('type' => 'serial'),
-			'number'=> array('type' => 'int'),
-			'teaser'=> array('type' => 'varchar','length' => 150),
-			'text'  => array('type' => 'text')
+	'description'  =>  'creating custom_table',
+	'fields'       =>  array(
+	        'id'	 => array('type' => 'serial'),
+			'number' => array('type' => 'int'),
+			'teaser' => array('type' => 'varchar','length' => 150),
+			'text'   => array('type' => 'text')
 		),
 	'primary key'=>array('id'),
 	);

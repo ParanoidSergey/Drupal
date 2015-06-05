@@ -6,29 +6,28 @@
  function my_database_menu(){
 	$items = array();
 	$items['insert-page'] = array(
-		'title' => 'Insert',
-		'page callback'   => 'drupal_get_form',
-		'page arguments'  => array('my_database_insert_page_form'),
-		'access callback' => TRUE,
-		);
+	  'title'            => 'Insert',
+	  'page callback'    => 'drupal_get_form',
+	  'page arguments'   => array('my_database_insert_page_form'),
+	  'access arguments' => array('administer users'),
+	  );
 	$items['select-page'] = array(
-		'title' => 'Select',
-		'page callback'   => 'my_database_select_page_table',
-		'access callback' => TRUE
-		);
+	  'title'           => 'Select',
+	  'page callback'   => 'my_database_select_page_table',
+	  'access callback' => TRUE);
 	$items['select-page/%/update-page'] = array(
-		'title callback'  => 'my_database_update_title',
-		'title arguments' => array(1),
-		'page callback'   => 'drupal_get_form',
-		'page arguments'  => array('my_database_update_page_form',1),
-		'access callback' => TRUE,
+		'title callback'   => 'my_database_update_title',
+		'title arguments'  => array(1),
+		'page callback'    => 'drupal_get_form',
+		'page arguments'   => array('my_database_update_page_form',1),
+		'access arguments' => array('administer users'),
 		);
 	$items['select-page/%/delete-page'] = array(
-		'title callback'  => 'my_database_delete_title',
-		'title arguments' => array(1),
-		'page callback'   => 'drupal_get_form',
-		'page arguments'  => array('my_database_delete_page_form',1),
-		'access callback' => TRUE,
+		'title callback'   => 'my_database_delete_title',
+		'title arguments'  => array(1),
+		'page callback'    => 'drupal_get_form',
+		'page arguments'   => array('my_database_delete_page_form',1),
+		'access arguments' => array('administer users'),
 	);
 	return $items;
  }
@@ -40,23 +39,23 @@
  function my_database_insert_page_form($form, $form_state){
 	$form = array();
 	$form['number'] = array(
-		'#type'  => 'textfield',
-		'#title' => t('number'),
-		'#size'  => 20,
+	  '#type'  => 'textfield',
+	  '#title' => t('number'),
+	  '#size'  => 20,
 	);
 	$form['teaser'] = array(
-		'#type'  => 'textfield',
-		'#title' => t('teaser'),
-		'#size'  => 20,
+	  '#type'  => 'textfield',
+	  '#title' => t('teaser'),
+	  '#size'  => 20,
 	);
 	$form['text'] = array(
-		'#type'  => 'textarea',
-		'#title' => t('text'),
-		'#size'  => 20,
+	  '#type'  => 'textarea',
+	  '#title' => t('text'),
+	  '#size'  => 20,
 	);
 	$form['submit'] = array(
-		'#type'  => 'submit',
-		'#value' => t('Submit'),
+	  '#type'  => 'submit',
+	  '#value' => t('Submit'),
 	);
 	return $form;
  }
@@ -66,10 +65,11 @@
  * Validate function for my_database_insert_page_form.
  */
  function my_database_insert_page_form_validate($form, &$form_state){
-	if (!is_numeric($form_state['values']['number'])){
-		form_set_error('number', t('Value in field "Number" is not number.'));
+	if (!is_numeric($form_state['values']['number']) || 
+	  is_int($form_state['values']['number'] + 0) == 0){
+		form_set_error('number', t('Value in field "Number"  is not number.'));
 	}
-	if (strlen($form_state['values']['teaser'])>=150){
+	if (drupal_strlen($form_state['values']['teaser'])>=150){
 		form_set_error('teaser',t('Value to large!'));
 	}
 	if(empty($form_state['values']['text'])){
@@ -94,7 +94,7 @@
 		drupal_set_message(t('Success'));
 	}
 	else{
-		form_set_error(t('Insert is failure'));
+		drupal_set_message(t('Insert is failure'),'error');
 	}
  }
  

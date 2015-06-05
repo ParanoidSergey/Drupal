@@ -1,0 +1,119 @@
+<?php
+
+/**
+ * Implement hook_menu()
+ */
+ function my_theming_menu(){
+  $items = array();
+  
+  $items['show-function-theme'] = array(
+    'title'           => 'Function Theme',
+	'page callback'   => 'my_theming_page',
+	'access callback' => TRUE,
+  );
+  
+  return $items;
+ }
+ 
+ /**
+  * Theme page
+  */
+ function my_theming_page(){
+   $output = theme_item_list(
+     array(
+      'items' => array(
+	     'data'     => '1',
+		 'type'     => 'ul',
+	     'children' => array(
+	       'data'     => 'First',
+		   'type'     => 'ul',
+	  	   'children' => array(
+		     'data'     => 'Second',
+			 'type'     => 'ul',
+	  	     'children' => array(
+		       'data' => 'Threed',
+			   'type' => 'li'
+			 ),
+		   ),
+	     ),
+	   ),
+	   'title'      => 'Item List',
+	   'type'       => 'ul',
+	   'attributes' => array(),
+	 )
+   );
+   
+   $output .= theme_fieldset(
+     array(
+	   'element' => array(
+	     '#title'      => 'Fieldset',
+		 '#children'   => 'I want to sleep =`(',
+		 '#colapsed'   => FALSE,
+		 '#colapsible' => FALSE
+	   )
+	 )
+   );
+   
+   $output .= theme_table(
+     array(
+	   'header'     => array('Good', 'Evil', 'Booze'),
+	   'rows'       => array(
+	     array('Icecream', 'War', 'Job'),
+		 array('Witcher 3', 'Politicians', 'Girls'),
+	   ),
+	   'colgroups'  => array(),
+	   'attributes' => array(),
+	   'sticky'     => TRUE,
+	   'caption'    => 'Table',
+	   'empty'      => 'this is bad...'
+	 )
+   );
+   
+   $output .= theme_image_style(
+     array(
+	   'style_name' => 'thumbnail',
+	   'attributes' => array(),
+       'path'       => 'images/image.jpg',
+	   'title'      => 'kekekeke',
+	   'width'      => '50px',
+	   'height'     => '75px'
+	 )
+   );
+   
+   $output .= theme('my_theming_change_text', array('text' => 'some important text with function'));
+   
+   $output .= theme('my_theming_tmp', array('text' => 'some important text with template'));
+   
+   return $output;
+ }
+ 
+ /**
+  * Implement hook_theme
+  */
+ function my_theming_theme($existing, $type, $theme, $path){
+   return array(
+     'my_theming_change_text' => array(
+	   'variables' => array('text' => NULL),
+	 ),
+	 'my_theming_tmp' => array(
+	   'variables' => array('text' => NULL),
+	   'template'  => 'my_theming_template'
+	 ),
+	 
+   );
+ }
+ 
+ /**
+  * Function to update design text
+  */
+ function theme_my_theming_change_text($variables){
+   return '<h2><strong>' . $variables['text'] . '</strong></h2>';
+ }
+ 
+ /**
+  * Implement hook_init
+  */
+ function my_theme_init(){
+   drupal_add_css(drupal_get_path('module', 'my_theming') . '/css/my_theming.css');
+ }
+ 
