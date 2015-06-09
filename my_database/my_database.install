@@ -1,12 +1,11 @@
 <?php
 
 /**
- * implements hook_install()
+ * implements hook_schema()
  */
  function my_database_install(){
-	$name = 'custom_table';
-	$schema = array(
-	'description'  =>  'creating custom_table',
+	$schema['custom_table'] = array(
+	'description'  =>  t('custom_table'),
 	'fields'       =>  array(
 	        'id'	 => array('type' => 'serial'),
 			'number' => array('type' => 'int'),
@@ -15,7 +14,7 @@
 		),
 	'primary key'=>array('id'),
 	);
-	db_create_table($name,$schema);
+	return $schema;
  }
  
  /**

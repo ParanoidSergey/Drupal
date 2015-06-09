@@ -22,16 +22,16 @@
    $output = theme_item_list(
      array(
       'items' => array(
-	     'data'     => '1',
+	     'data'     => t('1'),
 		 'type'     => 'ul',
 	     'children' => array(
-	       'data'     => 'First',
+	       'data'     => t('First'),
 		   'type'     => 'ul',
 	  	   'children' => array(
-		     'data'     => 'Second',
+		     'data'     => t('Second'),
 			 'type'     => 'ul',
 	  	     'children' => array(
-		       'data' => 'Threed',
+		       'data' => t('Threed'),
 			   'type' => 'li'
 			 ),
 		   ),
@@ -46,8 +46,8 @@
    $output .= theme_fieldset(
      array(
 	   'element' => array(
-	     '#title'      => 'Fieldset',
-		 '#children'   => 'I want to sleep =`(',
+	     '#title'      => t('Fieldset'),
+		 '#children'   => t('I want to sleep =`('),
 		 '#colapsed'   => FALSE,
 		 '#colapsible' => FALSE
 	   )
@@ -58,14 +58,14 @@
      array(
 	   'header'     => array('Good', 'Evil', 'Booze'),
 	   'rows'       => array(
-	     array('Icecream', 'War', 'Job'),
-		 array('Witcher 3', 'Politicians', 'Girls'),
+	     array(t('Icecream'), t(('War'), t(('Job')),
+		 array(t('Witcher 3'), t('Politicians'), t('Girls')),
 	   ),
 	   'colgroups'  => array(),
 	   'attributes' => array(),
 	   'sticky'     => TRUE,
 	   'caption'    => 'Table',
-	   'empty'      => 'this is bad...'
+	   'empty'      => t('this is bad...')
 	 )
    );
    
@@ -74,15 +74,15 @@
 	   'style_name' => 'thumbnail',
 	   'attributes' => array(),
        'path'       => 'images/image.jpg',
-	   'title'      => 'kekekeke',
+	   'title'      => t('kekekeke'),
 	   'width'      => '50px',
 	   'height'     => '75px'
 	 )
    );
    
-   $output .= theme('my_theming_change_text', array('text' => 'some important text with function'));
+   $output .= theme('my_theming_change_text', array('text' => t('some important text with function')));
    
-   $output .= theme('my_theming_tmp', array('text' => 'some important text with template'));
+   $output .= theme('my_theming_tmp', array('text' => t('some important text with template')));
    
    return $output;
  }
@@ -115,5 +115,14 @@
   */
  function my_theme_init(){
    drupal_add_css(drupal_get_path('module', 'my_theming') . '/css/my_theming.css');
+ }
+ 
+ /**
+  * Implement template_preprocess_page
+  */
+ function my_theming_preprocess_page($variables){
+   if (isset($variables['node']) && $variables['node']->title == 'SomeGoodTitle') {
+     drupal_set_title('Example template_preprocess_page');
+   }
  }
  
