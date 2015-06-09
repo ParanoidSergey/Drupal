@@ -16,11 +16,3 @@
 	);
 	return $schema;
  }
- 
- /**
- * implements hook_uninstall()
- */
-  function my_database_uninstall(){
-	$name = 'custom_table';
-	db_drop_table($name);
- }
